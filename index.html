@@ -84,6 +84,9 @@
     -webkit-tap-highlight-color:transparent;
   }
   .action-head:active{ transform:scale(0.985); }
+  .action:not(.open):hover{ border-color:var(--yellow); }
+  .action:not(.open) .action-head:hover .a-icon{ background:var(--yellow); color:var(--yellow-ink); border-color:var(--yellow); }
+  .action:not(.open) .action-head:hover .a-chev{ border-color:var(--yellow); }
   .a-num{
     font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--text-faint);
     width:20px; flex:none;
@@ -122,8 +125,9 @@
   }
   .a-btn:active{ transform:scale(0.97); }
   .a-btn.primary{ background:var(--accent, var(--yellow)); color:var(--yellow-ink); font-weight:600; }
-  .a-btn.primary:active{ filter:brightness(0.94); }
-  .a-btn.secondary{ background:transparent; border:1px solid var(--border); color:var(--text-muted); }
+  .a-btn.primary:hover, .a-btn.primary:active{ filter:brightness(0.94); }
+  .a-btn.secondary{ background:transparent; border:1px solid var(--border); color:var(--text-muted); transition:background .15s ease, color .15s ease, border-color .15s ease; }
+  .a-btn.secondary:hover{ background:var(--yellow); color:var(--yellow-ink); border-color:var(--yellow); }
 
   /* ---------- ORDER STEPS ---------- */
   .section{ margin-top:44px; position:relative; z-index:1; }
