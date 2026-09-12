@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Shop 4DRIP — authenticated resale and our own in-house line. Metro Detroit. Search the catalog, then message us on WhatsApp to lock in your size.">
+<title>Shop — 4DRIP</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  .shop-hero{ padding:44px 0 28px; border-bottom:1px solid var(--border-soft); }
+  .shop-kicker{ font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--teal); margin-bottom:8px; }
+  .shop-title{ font-family:"Anton",sans-serif; font-size:clamp(30px,6vw,46px); text-transform:uppercase; line-height:1; margin:0 0 10px; }
+  .shop-title span{ color:var(--yellow); }
+  .shop-sub{ color:var(--text-muted); font-size:15px; max-width:52ch; }
+
+  .toolbar{ position:sticky; top:65px; z-index:30; background:var(--bg); padding:18px 0 16px; border-bottom:1px solid var(--border-soft); }
+  .search-row{ display:flex; gap:10px; margin-bottom:14px; }
+  .search-input{
+    flex:1; background:var(--bg-1); border:1px solid var(--border); border-radius:2px;
+    padding:12px 14px; color:var(--text); font-size:14px;
+  }
+  .search-input::placeholder{ color:var(--text-faint); }
+  .search-input:focus{ outline:none; border-color:var(--teal); }
+  /* Single scrolling row instead of wrapping — keeps the toolbar from growing
+     taller as more categories get added, and stops it from burying the
+     product grid on narrow phone screens. */
+  .pills{
+    display:flex; flex-wrap:nowrap; gap:8px;
+    overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch;
+    scrollbar-width:none; padding-bottom:2px; margin:0 -24px; padding-left:24px; padding-right:24px;
+  }
+  .pills::-webkit-scrollbar{ display:none; }
+  .pill{
+    flex:none; white-space:nowrap;
+    font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.05em; text-transform:uppercase;
+    padding:8px 13px; border:1px solid var(--border); border-radius:100px; color:var(--text-muted);
+    transition:all .15s ease;
+  }
+  .pill:hover{ border-color:var(--text-faint); color:var(--text); }
+  .pill.active{ background:var(--yellow); color:var(--yellow-ink); border-color:var(--yellow); font-weight:600; }
+  .result-count{ margin-top:12px; font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-faint); }
+
+  /* ---------- LAYOUT: sidebar categories on desktop, scrolling pill row on mobile ---------- */
+  .shop-layout{ display:flex; gap:32px; align-items:flex-start; }
+  .shop-main{ flex:1; min-width:0; }
+  .sidebar{ display:none; }
+
+  @media (min-width:860px){
+    .sidebar{
+      display:block; flex:none; width:196px;
+      position:sticky; top:100px;
+      padding-top:30px;
+    }
+    .sidebar-title{
+      font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase;
+      color:var(--text-faint); margin-bottom:14px;
+    }
+    .sidebar-pills{ display:flex; flex-direction:column; gap:2px; }
+    .sidebar-pill{
+      display:block; width:100%; text-align:left; padding:10px 12px; border-radius:2px;
+      font-family:"JetBrains Mono",monospace; font-size:12.5px; letter-spacing:0.02em; color:var(--text-muted);
+      border-left:2px solid transparent; transition:all .15s ease;
+    }
+    .sidebar-pill:hover{ color:var(--text); background:var(--bg-1); }
+    .sidebar-pill.active{ color:var(--yellow); background:var(--bg-1); border-left-color:var(--yellow); font-weight:600; }
+    /* the horizontal pill row is mobile-only — the sidebar replaces it on desktop */
+    .toolbar .pills{ display:none; }
+  }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:16px; padding:28px 0 20px; }
+  .card{
+    background:var(--bg-1); border:1px solid var(--border); border-radius:3px; overflow:hidden;
+    display:flex; flex-direction:column; transition:transform .15s ease, border-color .15s ease;
+  }
+  .card:hover{ transform:translateY(-3px); border-color:var(--text-faint); }
+  .card-img{ position:relative; aspect-ratio:1/1; background:var(--bg-2); }
+  .card-img img{ width:100%; height:100%; object-fit:cover; cursor:zoom-in; }
+  .card-img .noimg{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--text-faint); font-family:"JetBrains Mono",monospace; font-size:11px; text-transform:uppercase; }
+  .select-btn{
+    position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:50%; z-index:2;
+    background:rgba(13,12,11,0.75); border:1.5px solid var(--border); color:var(--text);
+    display:flex; align-items:center; justify-content:center; font-family:"JetBrains Mono",monospace; font-size:15px; font-weight:600;
+    transition:all .15s ease;
+  }
+  .select-btn:hover{ border-color:var(--yellow); }
+  .select-btn.active{ background:var(--yellow); border-color:var(--yellow); color:var(--yellow-ink); }
+  .card.selected{ border-color:var(--yellow); }
+  .badge{
+    position:absolute; top:10px; left:10px; font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:0.06em; text-transform:uppercase;
+    padding:5px 9px; border-radius:100px; background:rgba(13,12,11,0.82); color:var(--text); border:1px solid var(--border);
+  }
+  .badge.available{ color:var(--green); border-color:rgba(63,185,95,0.4); }
+  .badge.few{ color:var(--orange); border-color:rgba(255,189,89,0.4); }
+  .badge.sold{ color:var(--text-faint); }
+  .card-body{ padding:14px 14px 16px; display:flex; flex-direction:column; gap:6px; flex:1; }
+  .card-brand{ font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); }
+  .card-name{ font-family:"Anton",sans-serif; font-size:15.5px; text-transform:uppercase; line-height:1.2; }
+  .card-meta{ font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--text-muted); margin-top:2px; }
+  .card-cta{
+    margin-top:auto; padding-top:10px;
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    font-family:"JetBrains Mono",monospace; font-size:11.5px; letter-spacing:0.05em; text-transform:uppercase; font-weight:600;
+    background:var(--yellow); color:var(--yellow-ink); padding:11px 12px; border-radius:2px;
+    transition:filter .12s ease;
+  }
+  .card-cta:hover{ filter:brightness(0.95); }
+
+  .state{ padding:60px 20px; text-align:center; color:var(--text-faint); }
+  .state .t{ font-family:"Anton",sans-serif; font-size:20px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px; }
+  .state .s{ font-size:13.5px; max-width:44ch; margin:0 auto; }
+
+  .skel{ background:linear-gradient(100deg, var(--bg-1) 30%, var(--bg-2) 50%, var(--bg-1) 70%); background-size:220% 100%; animation:shimmer 1.3s ease-in-out infinite; }
+  @keyframes shimmer{ 0%{background-position:120% 0;} 100%{background-position:-20% 0;} }
+
+  /* ---------- LIGHTBOX ---------- */
+  .lightbox{
+    position:fixed; inset:0; z-index:90; background:rgba(9,8,7,0.94);
+    display:none; align-items:center; justify-content:center; padding:28px;
+  }
+  .lightbox.open{ display:flex; }
+  .lightbox img{ max-width:92vw; max-height:88vh; width:auto; height:auto; object-fit:contain; border-radius:4px; cursor:default; }
+  .lightbox-close{
+    position:absolute; top:18px; right:18px; width:42px; height:42px; border-radius:50%;
+    background:rgba(255,255,255,0.08); color:var(--text); font-size:24px; line-height:1;
+    display:flex; align-items:center; justify-content:center; border:1px solid var(--border);
+  }
+  .lightbox-close:hover{ background:rgba(255,255,255,0.16); }
+  .lightbox-nav{
+    position:absolute; top:50%; transform:translateY(-50%); width:48px; height:48px; border-radius:50%;
+    background:rgba(255,255,255,0.08); color:var(--text); font-size:26px; line-height:1;
+    display:none; align-items:center; justify-content:center; border:1px solid var(--border);
+  }
+  .lightbox-nav:hover{ background:rgba(255,255,255,0.16); }
+  .lightbox-nav.show{ display:flex; }
+  .lightbox-prev{ left:14px; }
+  .lightbox-next{ right:14px; }
+  .lightbox-counter{
+    position:absolute; bottom:20px; left:50%; transform:translateX(-50%);
+    font-family:"JetBrains Mono",monospace; font-size:11.5px; letter-spacing:0.05em;
+    background:rgba(255,255,255,0.1); color:var(--text); padding:6px 12px; border-radius:100px;
+    border:1px solid var(--border); display:none;
+  }
+  .lightbox-counter.show{ display:block; }
+  @media (max-width:560px){
+    .lightbox-nav{ width:40px; height:40px; font-size:22px; }
+    .lightbox-prev{ left:6px; }
+    .lightbox-next{ right:6px; }
+  }
+
+  /* ---------- CART DOCK ---------- */
+  .cart-dock{ position:fixed; left:0; right:0; bottom:0; z-index:70; display:none; }
+  .cart-dock.open{ display:block; }
+  .cart-drawer{ max-height:0; overflow:hidden; transition:max-height .2s ease; background:var(--bg-1); border-top:1px solid var(--border-soft); }
+  .cart-drawer.open{ max-height:260px; overflow-y:auto; }
+  .cart-drawer-inner{ padding:12px 16px; max-width:1180px; margin:0 auto; display:flex; flex-direction:column; }
+  .cart-item-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; padding:8px 0; border-bottom:1px solid var(--border-soft); }
+  .cart-item-row:last-child{ border-bottom:none; }
+  .cart-item-remove{ font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-faint); flex-shrink:0; }
+  .cart-item-remove:hover{ color:var(--text); }
+  .cart-bar{
+    background:var(--bg-1); border-top:1px solid var(--border); padding:12px 16px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    box-shadow:0 -8px 24px -12px rgba(0,0,0,0.18);
+  }
+  .cart-bar .wrap{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; width:100%; padding:0; }
+  .cart-summary{ display:flex; align-items:center; gap:9px; font-family:"JetBrains Mono",monospace; font-size:12.5px; letter-spacing:0.03em; text-transform:uppercase; color:var(--text-muted); }
+  .cart-count-badge{ background:var(--yellow); color:var(--yellow-ink); border-radius:100px; padding:3px 9px; font-weight:700; font-size:11px; }
+  .cart-summary:hover{ color:var(--text); }
+  .cart-actions{ display:flex; align-items:center; gap:16px; }
+  .cart-clear-btn{ font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-faint); }
+  .cart-clear-btn:hover{ color:var(--text-muted); }
+  .cart-quote-btn{
+    display:flex; align-items:center; gap:8px; background:var(--yellow); color:var(--yellow-ink);
+    font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:0.04em; text-transform:uppercase; font-weight:600;
+    padding:12px 18px; border-radius:2px; transition:filter .12s ease;
+  }
+  .cart-quote-btn:hover{ filter:brightness(0.95); }
+  .cart-quote-btn svg{ width:16px; height:16px; }
+  body.cart-open .wa-float{ bottom:76px; }
+  @media (max-width:560px){
+    .cart-actions{ width:100%; justify-content:space-between; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a class="nav-brand" href="index.html"><img src="assets/logo.png" alt=""><span>4DRIP</span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html" class="active">Shop</a>
+      <a href="how-it-works.html">How it works</a>
+      <a class="cta" href="https://wa.me/15865535504?text=Hi%2C%20I%27m%20interested%20in..." target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="shop-hero">
+    <div class="shop-kicker">Your fashion plug &middot; Metro Detroit</div>
+    <h1 class="shop-title">Yeah.<br><span>We got that.</span></h1>
+    <p class="shop-sub">Authenticated resale plus our own line. Find something you like, then message us on WhatsApp — we'll confirm sizing and availability directly.</p>
+  </div>
+
+  <div class="shop-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-title">Categories</div>
+      <div class="sidebar-pills" id="sidebar-pills"></div>
+    </aside>
+
+    <div class="shop-main">
+      <div class="toolbar">
+        <div class="search-row">
+          <input class="search-input" id="search" type="text" placeholder="Search brand, item, size, or SKU&hellip;" autocomplete="off">
+        </div>
+        <div class="pills" id="pills"></div>
+        <div class="result-count" id="result-count"></div>
+      </div>
+
+      <div id="grid" class="grid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" aria-label="Close">&times;</button>
+  <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Previous photo">&#8249;</button>
+  <img id="lightbox-img" src="" alt="">
+  <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Next photo">&#8250;</button>
+  <div class="lightbox-counter" id="lightbox-counter"></div>
+</div>
+
+<div class="cart-dock" id="cart-dock">
+  <div class="cart-drawer" id="cart-drawer">
+    <div class="cart-drawer-inner" id="cart-drawer-inner"></div>
+  </div>
+  <div class="cart-bar">
+    <div class="wrap">
+      <button class="cart-summary" id="cart-toggle">
+        <span class="cart-count-badge" id="cart-count">0</span> selected &middot; tap to view
+      </button>
+      <div class="cart-actions">
+        <button class="cart-clear-btn" id="cart-clear">Clear all</button>
+        <a class="cart-quote-btn" id="cart-quote-link" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.48 1.34 4.99L2 22l5.2-1.36a9.94 9.94 0 0 0 4.84 1.23h.01c5.5 0 9.96-4.46 9.96-9.96S17.55 2 12.04 2zm0 18.18h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.09.81.82-3-.2-.31a8.22 8.22 0 0 1-1.26-4.39c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.55-3.7 8.24-8.24 8.24zm4.52-6.17c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.17.24-.64.8-.78.97-.14.16-.29.18-.53.06-.25-.12-1.05-.39-1.99-1.24-.74-.66-1.23-1.47-1.38-1.72-.14-.24-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.36-.77-1.86-.2-.49-.4-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.22.24-.86.85-.86 2.07 0 1.22.89 2.4 1.02 2.57.12.16 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg>
+          Get quote on WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<a class="wa-float" href="https://wa.me/15865535504?text=Hi%2C%20I%27m%20interested%20in..." target="_blank" rel="noopener">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.48 1.34 4.99L2 22l5.2-1.36a9.94 9.94 0 0 0 4.84 1.23h.01c5.5 0 9.96-4.46 9.96-9.96S17.55 2 12.04 2zm0 18.18h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.09.81.82-3-.2-.31a8.22 8.22 0 0 1-1.26-4.39c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.55-3.7 8.24-8.24 8.24zm4.52-6.17c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.17.24-.64.8-.78.97-.14.16-.29.18-.53.06-.25-.12-1.05-.39-1.99-1.24-.74-.66-1.23-1.47-1.38-1.72-.14-.24-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.36-.77-1.86-.2-.49-.4-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.22.24-.86.85-.86 2.07 0 1.22.89 2.4 1.02 2.57.12.16 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg>
+  WhatsApp 4DRIP
+</a>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <img src="assets/logo.png" alt="">
+      <div>
+        <div class="foot-line">4DRIP &middot; Metro Detroit</div>
+        <div class="foot-tag">It's in you, not on you.</div>
+      </div>
+    </div>
+    <div class="foot-links">
+      <a href="index.html">Home</a>
+      <a href="https://www.instagram.com/4drip313/" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://wa.me/15865535504" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-client.js"></script>
+<script>
+  let ALL = [];
+  let activeCat = "All";
+  let searchTerm = "";
+
+  // ---------- Cart (multi-select quote request) ----------
+  const CART_KEY = "4drip_cart_v1";
+  let cart = new Set();
+  let drawerOpen = false;
+
+  function loadCart(){
+    try {
+      const raw = localStorage.getItem(CART_KEY);
+      if (raw) JSON.parse(raw).forEach(sku => cart.add(sku));
+    } catch(e){ /* storage unavailable — cart just won't persist across reloads */ }
+  }
+  function saveCart(){
+    try { localStorage.setItem(CART_KEY, JSON.stringify(Array.from(cart))); } catch(e){}
+  }
+  function toggleCartItem(sku){
+    if (!sku) return;
+    if (cart.has(sku)) cart.delete(sku); else cart.add(sku);
+    saveCart();
+    render();
+  }
+  function removeCartItem(sku){
+    cart.delete(sku);
+    if (!cart.size) drawerOpen = false;
+    saveCart();
+    render();
+  }
+  function clearCart(){
+    cart.clear();
+    drawerOpen = false;
+    saveCart();
+    render();
+  }
+  function cartProducts(){
+    return Array.from(cart).map(sku => ALL.find(p => p.sku === sku)).filter(Boolean);
+  }
+  function buildQuoteMessage(){
+    const items = cartProducts();
+    if (!items.length) return "";
+    const lines = items.map((p, i) => {
+      const sizes = (p.sizes && p.sizes.length) ? ` (${p.sizes.join(", ")})` : "";
+      return `${i + 1}. ${p.brand} ${p.name} — SKU ${p.sku}${sizes}`;
+    });
+    return `Hey 4DRIP, I'd like a quote for:\n\n${lines.join("\n")}\n\nLet me know pricing and availability!`;
+  }
+  function updateCartUI(){
+    const items = cartProducts();
+    document.body.classList.toggle("cart-open", items.length > 0);
+    document.getElementById("cart-dock").classList.toggle("open", items.length > 0);
+    document.getElementById("cart-drawer").classList.toggle("open", drawerOpen && items.length > 0);
+    document.getElementById("cart-count").textContent = items.length;
+    document.getElementById("cart-quote-link").href = items.length ? waLink(buildQuoteMessage()) : "#";
+    document.getElementById("cart-drawer-inner").innerHTML = items.map(p => `
+      <div class="cart-item-row">
+        <span>${escapeHtml(p.brand)} ${escapeHtml(p.name)} <span class="mono" style="color:var(--text-faint);">&middot; ${escapeHtml(p.sku)}</span></span>
+        <button class="cart-item-remove" data-remove-sku="${escapeHtml(p.sku)}">Remove</button>
+      </div>`).join("");
+  }
+
+  // ---------- Lightbox (click a photo to expand it — scrolls through all of a product's photos) ----------
+  let lightboxPaths = [];
+  let lightboxIndex = 0;
+  let lightboxAlt = "";
+
+  function openLightbox(paths, startIndex, alt){
+    if (!paths || !paths.length) return;
+    lightboxPaths = paths;
+    lightboxIndex = startIndex || 0;
+    lightboxAlt = alt || "";
+    renderLightboxImage();
+    document.getElementById("lightbox").classList.add("open");
+  }
+  function renderLightboxImage(){
+    const src = productImageUrl(lightboxPaths[lightboxIndex]);
+    const img = document.getElementById("lightbox-img");
+    img.src = src;
+    img.alt = lightboxAlt;
+    const multi = lightboxPaths.length > 1;
+    document.getElementById("lightbox-prev").classList.toggle("show", multi);
+    document.getElementById("lightbox-next").classList.toggle("show", multi);
+    const counter = document.getElementById("lightbox-counter");
+    counter.classList.toggle("show", multi);
+    counter.textContent = multi ? `${lightboxIndex + 1} / ${lightboxPaths.length}` : "";
+  }
+  function lightboxPrevImg(){
+    if (lightboxPaths.length < 2) return;
+    lightboxIndex = (lightboxIndex - 1 + lightboxPaths.length) % lightboxPaths.length;
+    renderLightboxImage();
+  }
+  function lightboxNextImg(){
+    if (lightboxPaths.length < 2) return;
+    lightboxIndex = (lightboxIndex + 1) % lightboxPaths.length;
+    renderLightboxImage();
+  }
+  function closeLightbox(){
+    document.getElementById("lightbox").classList.remove("open");
+    document.getElementById("lightbox-img").src = "";
+    lightboxPaths = [];
+  }
+
+  function escapeHtml(s){
+    return String(s || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  function statusClass(p){
+    if ((p.stock ?? 0) <= 0 || /sold/i.test(p.status || "")) return "sold";
+    if (/few/i.test(p.status || "")) return "few";
+    return "available";
+  }
+  function statusLabel(p){
+    if ((p.stock ?? 0) <= 0 || /sold/i.test(p.status || "")) return "Sold";
+    return p.status || "Available";
+  }
+
+  // A product's category field can hold several categories separated by commas
+  // (e.g. "Hoodies, Streetwear") — split it out wherever we need the individual list.
+  function splitCategories(cat){
+    return String(cat || "").split(",").map(s => s.trim()).filter(Boolean);
+  }
+
+  function categories(){
+    const set = new Set();
+    ALL.forEach(p => splitCategories(p.category).forEach(c => set.add(c)));
+    return ["All", ...Array.from(set).sort()];
+  }
+
+  function renderPills(){
+    const cats = categories();
+    document.getElementById("pills").innerHTML = cats.map(c =>
+      `<button class="pill${c === activeCat ? " active" : ""}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`
+    ).join("");
+    // Same categories, rendered again as a vertical list for the desktop sidebar —
+    // CSS decides which one is actually visible at a given screen size.
+    document.getElementById("sidebar-pills").innerHTML = cats.map(c =>
+      `<button class="sidebar-pill${c === activeCat ? " active" : ""}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`
+    ).join("");
+    document.querySelectorAll(".pill, .sidebar-pill").forEach(btn => {
+      btn.addEventListener("click", () => { activeCat = btn.dataset.cat; render(); });
+    });
+  }
+
+  function visible(){
+    const q = searchTerm.trim().toLowerCase();
+    return ALL.filter(p => {
+      if (activeCat !== "All" && !splitCategories(p.category).includes(activeCat)) return false;
+      if (!q) return true;
+      const hay = [p.brand, p.name, p.category, p.sku, (p.sizes || []).join(" ")].join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  function cardHtml(p){
+    const img = (p.images && p.images[0]) ? productImageUrl(p.images[0]) : "";
+    const sizes = (p.sizes && p.sizes.length) ? p.sizes.join(" &middot; ") : "One size";
+    const inCart = cart.has(p.sku);
+    return `
+      <div class="card${inCart ? " selected" : ""}" data-sku="${escapeHtml(p.sku)}">
+        <div class="card-img">
+          ${img ? `<img src="${img}" alt="${escapeHtml(p.brand + ' ' + p.name)}" loading="lazy">` : `<div class="noimg">No photo yet</div>`}
+          <span class="badge ${statusClass(p)}">${escapeHtml(statusLabel(p))}</span>
+          <button class="select-btn${inCart ? " active" : ""}" data-action="toggle-cart" title="${inCart ? "Remove from quote" : "Add to quote"}" aria-label="${inCart ? "Remove from quote" : "Add to quote"}">${inCart ? "&#10003;" : "+"}</button>
+        </div>
+        <div class="card-body">
+          <div class="card-brand">${escapeHtml(p.brand)}</div>
+          <div class="card-name">${escapeHtml(p.name)}</div>
+          <div class="card-meta">${sizes} &middot; SKU ${escapeHtml(p.sku)}</div>
+          <a class="card-cta" href="${waProductLink(p)}" target="_blank" rel="noopener">Ask on WhatsApp &rarr;</a>
+        </div>
+      </div>`;
+  }
+
+  function render(){
+    renderPills();
+    const items = visible();
+    const grid = document.getElementById("grid");
+    document.getElementById("result-count").textContent = `${items.length} item${items.length === 1 ? "" : "s"}`;
+    if (!items.length){
+      grid.innerHTML = "";
+      grid.insertAdjacentHTML("afterend", "");
+      document.getElementById("grid").innerHTML = `
+        <div class="state" style="grid-column:1/-1;">
+          <div class="t">Nothing matches yet</div>
+          <div class="s">Try a different search, or ask us directly — a lot of what we carry isn't posted yet.</div>
+        </div>`;
+      return;
+    }
+    grid.innerHTML = items.map(cardHtml).join("");
+    updateCartUI();
+  }
+
+  function renderSkeleton(){
+    document.getElementById("grid").innerHTML = Array.from({length:8}).map(() => `
+      <div class="card">
+        <div class="card-img skel"></div>
+        <div class="card-body">
+          <div class="skel" style="height:10px; width:40%; border-radius:2px;"></div>
+          <div class="skel" style="height:16px; width:70%; border-radius:2px; margin-top:6px;"></div>
+          <div class="skel" style="height:38px; width:100%; border-radius:2px; margin-top:12px;"></div>
+        </div>
+      </div>`).join("");
+  }
+
+  async function load(){
+    renderSkeleton();
+    const { data, error } = await db
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error){
+      document.getElementById("grid").innerHTML = `
+        <div class="state" style="grid-column:1/-1;">
+          <div class="t">Couldn't load the catalog</div>
+          <div class="s">${escapeHtml(error.message)}</div>
+        </div>`;
+      return;
+    }
+    ALL = data || [];
+    render();
+  }
+
+  document.getElementById("search").addEventListener("input", e => {
+    searchTerm = e.target.value;
+    render();
+  });
+
+  // ---------- Wire up cart + lightbox interactions ----------
+  document.getElementById("grid").addEventListener("click", (e) => {
+    const selectBtn = e.target.closest(".select-btn");
+    if (selectBtn){
+      e.preventDefault();
+      e.stopPropagation();
+      const card = selectBtn.closest(".card");
+      if (card) toggleCartItem(card.dataset.sku);
+      return;
+    }
+    const img = e.target.closest(".card-img img");
+    if (img){
+      e.preventDefault();
+      const card = img.closest(".card");
+      const p = card && ALL.find(x => x.sku === card.dataset.sku);
+      if (p) openLightbox((p.images && p.images.length ? p.images : []), 0, `${p.brand} ${p.name}`);
+    }
+  });
+
+  document.getElementById("lightbox").addEventListener("click", (e) => {
+    if (e.target.id === "lightbox" || e.target.closest(".lightbox-close")) closeLightbox();
+    else if (e.target.closest("#lightbox-prev")) lightboxPrevImg();
+    else if (e.target.closest("#lightbox-next")) lightboxNextImg();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (!document.getElementById("lightbox").classList.contains("open")) return;
+    if (e.key === "Escape") closeLightbox();
+    else if (e.key === "ArrowLeft") lightboxPrevImg();
+    else if (e.key === "ArrowRight") lightboxNextImg();
+  });
+
+  // Swipe support for mobile
+  (function(){
+    let touchStartX = null;
+    const lb = document.getElementById("lightbox");
+    lb.addEventListener("touchstart", (e) => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
+    lb.addEventListener("touchend", (e) => {
+      if (touchStartX === null) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 40){ dx > 0 ? lightboxPrevImg() : lightboxNextImg(); }
+      touchStartX = null;
+    }, { passive: true });
+  })();
+
+  document.getElementById("cart-dock").addEventListener("click", (e) => {
+    const removeBtn = e.target.closest("[data-remove-sku]");
+    if (removeBtn){
+      removeCartItem(removeBtn.dataset.removeSku);
+      return;
+    }
+    if (e.target.closest("#cart-clear")){
+      clearCart();
+      return;
+    }
+    if (e.target.closest("#cart-toggle")){
+      drawerOpen = !drawerOpen;
+      updateCartUI();
+      return;
+    }
+  });
+
+  loadCart();
+  load();
+</script>
+</body>
+</html>
