@@ -30,7 +30,7 @@
   .hero-logo-wrap{ width:118px; height:118px; margin:0 auto 14px; position:relative; }
   .hero-logo-wrap img{
     width:100%; opacity:0; transform:translateY(10px) scale(0.92);
-    filter:drop-shadow(0 18px 26px rgba(0,0,0,0.18));
+    filter:drop-shadow(0 18px 26px rgba(0,0,0,0.5));
     animation: dripIn 0.9s cubic-bezier(.2,.9,.25,1) 0.05s forwards;
   }
   @keyframes dripIn{
@@ -76,7 +76,7 @@
   .actions .action:nth-child(3){ animation-delay:1.06s; }
   .action.open{
     border-color: color-mix(in srgb, var(--accent, var(--yellow)) 55%, var(--border));
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent, var(--yellow)) 30%, transparent), 0 16px 30px -18px rgba(0,0,0,0.18);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent, var(--yellow)) 30%, transparent), 0 16px 30px -18px rgba(0,0,0,0.7);
   }
   .action-head{
     width:100%; display:flex; align-items:center; gap:14px;
@@ -84,9 +84,6 @@
     -webkit-tap-highlight-color:transparent;
   }
   .action-head:active{ transform:scale(0.985); }
-  .action:not(.open):hover{ border-color:var(--yellow); }
-  .action:not(.open) .action-head:hover .a-icon{ background:var(--yellow); color:var(--yellow-ink); border-color:var(--yellow); }
-  .action:not(.open) .action-head:hover .a-chev{ border-color:var(--yellow); }
   .a-num{
     font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--text-faint);
     width:20px; flex:none;
@@ -125,9 +122,8 @@
   }
   .a-btn:active{ transform:scale(0.97); }
   .a-btn.primary{ background:var(--accent, var(--yellow)); color:var(--yellow-ink); font-weight:600; }
-  .a-btn.primary:hover, .a-btn.primary:active{ filter:brightness(0.94); }
-  .a-btn.secondary{ background:transparent; border:1px solid var(--border); color:var(--text-muted); transition:background .15s ease, color .15s ease, border-color .15s ease; }
-  .a-btn.secondary:hover{ background:var(--yellow); color:var(--yellow-ink); border-color:var(--yellow); }
+  .a-btn.primary:active{ filter:brightness(0.94); }
+  .a-btn.secondary{ background:transparent; border:1px solid var(--border); color:var(--text-muted); }
 
   /* ---------- ORDER STEPS ---------- */
   .section{ margin-top:44px; position:relative; z-index:1; }
@@ -159,7 +155,7 @@
   .ask-body b{ color:var(--text); font-weight:600; }
 </style>
 </head>
-<body>
+<body data-page="index">
 
 <nav class="site-nav">
   <div class="wrap">
@@ -168,7 +164,7 @@
       <a href="index.html" class="active">Home</a>
       <a href="shop.html">Shop</a>
       <a href="how-it-works.html">How it works</a>
-      <a class="cta" href="https://wa.me/15865535504?text=Hi%2C%20I%27m%20interested%20in..." target="_blank" rel="noopener">WhatsApp</a>
+      <a class="cta" href="https://wa.me/15865535504?text=Hi%2C%20I%27m%20interested%20in..." target="_blank" rel="noopener" onclick="trackClick('whatsapp_nav')">WhatsApp</a>
     </div>
   </div>
 </nav>
@@ -195,8 +191,8 @@
         <span class="a-chev"></span>
       </button>
       <div class="a-panel"><div class="a-panel-inner"><div class="a-links">
-        <a class="a-btn primary" href="shop.html">Open the shop</a>
-        <a class="a-btn secondary" href="#act-message" onclick="toggleAction('act-message'); return false;">Ask about a piece instead</a>
+        <a class="a-btn primary" href="shop.html" onclick="trackClick('open_shop')">Open the shop</a>
+        <a class="a-btn secondary" href="#act-message" onclick="trackClick('ask_about_piece'); toggleAction('act-message'); return false;">Ask about a piece instead</a>
       </div></div></div>
     </div>
 
@@ -211,8 +207,8 @@
         <span class="a-chev"></span>
       </button>
       <div class="a-panel"><div class="a-panel-inner"><div class="a-links">
-        <a class="a-btn primary" href="https://wa.me/15865535504?text=Hi%2C%20I%27m%20interested%20in..." target="_blank" rel="noopener">Open WhatsApp</a>
-        <a class="a-btn secondary" href="https://www.instagram.com/4drip313/" target="_blank" rel="noopener">Not on WhatsApp? DM on Instagram</a>
+        <a class="a-btn primary" href="https://wa.me/15865535504?text=Hi%2C%20I%27m%20interested%20in..." target="_blank" rel="noopener" onclick="trackClick('whatsapp_message')">Open WhatsApp</a>
+        <a class="a-btn secondary" href="https://www.instagram.com/4drip313/" target="_blank" rel="noopener" onclick="trackClick('instagram_dm')">Not on WhatsApp? DM on Instagram</a>
       </div></div></div>
     </div>
 
@@ -227,8 +223,8 @@
         <span class="a-chev"></span>
       </button>
       <div class="a-panel"><div class="a-panel-inner"><div class="a-links">
-        <a class="a-btn primary" href="https://www.instagram.com/4drip313/" target="_blank" rel="noopener">Open Instagram</a>
-        <a class="a-btn secondary" href="#act-message" onclick="toggleAction('act-message'); return false;">Prefer to talk first? DM us</a>
+        <a class="a-btn primary" href="https://www.instagram.com/4drip313/" target="_blank" rel="noopener" onclick="trackClick('instagram_follow')">Open Instagram</a>
+        <a class="a-btn secondary" href="#act-message" onclick="trackClick('prefer_to_talk'); toggleAction('act-message'); return false;">Prefer to talk first? DM us</a>
       </div></div></div>
     </div>
   </div>
@@ -262,13 +258,16 @@
     </div>
     <div class="foot-links">
       <a href="shop.html">Shop</a>
-      <a href="https://www.instagram.com/4drip313/" target="_blank" rel="noopener">Instagram</a>
-      <a href="https://wa.me/15865535504" target="_blank" rel="noopener">WhatsApp</a>
+      <a href="https://www.instagram.com/4drip313/" target="_blank" rel="noopener" onclick="trackClick('instagram_footer')">Instagram</a>
+      <a href="https://wa.me/15865535504" target="_blank" rel="noopener" onclick="trackClick('whatsapp_footer')">WhatsApp</a>
     </div>
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-client.js"></script>
 <script>
+  try { trackPageview('index'); } catch(e){}
   function toggleAction(id){
     var target = document.getElementById(id);
     var wasOpen = target.classList.contains('open');

@@ -95,7 +95,7 @@
   .cta-btn svg{ width:16px; height:16px; }
 </style>
 </head>
-<body>
+<body data-page="how-it-works">
 
 <nav class="site-nav">
   <div class="wrap">
@@ -104,7 +104,7 @@
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
       <a href="how-it-works.html" class="active">How it works</a>
-      <a class="cta" href="https://wa.me/15865535504?text=Hi%2C%20I%27m%20interested%20in..." target="_blank" rel="noopener">WhatsApp</a>
+      <a class="cta" href="https://wa.me/15865535504?text=Hi%2C%20I%27m%20interested%20in..." target="_blank" rel="noopener" onclick="trackClick('whatsapp_nav')">WhatsApp</a>
     </div>
   </div>
 </nav>
@@ -232,11 +232,11 @@
   <p class="reassure">Times listed above are typical, not guaranteed — <b>we'll keep you posted at every step</b>, so you shouldn't have to ask where things stand.</p>
 
   <div class="cta-row">
-    <a class="cta-btn primary" href="https://wa.me/15865535504?text=Hi%2C%20I%27m%20ready%20to%20order..." target="_blank" rel="noopener">
+    <a class="cta-btn primary" href="https://wa.me/15865535504?text=Hi%2C%20I%27m%20ready%20to%20order..." target="_blank" rel="noopener" onclick="trackClick('start_order_whatsapp')">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.48 1.34 4.99L2 22l5.2-1.36a9.94 9.94 0 0 0 4.84 1.23h.01c5.5 0 9.96-4.46 9.96-9.96S17.55 2 12.04 2zm0 18.18h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.09.81.82-3-.2-.31a8.22 8.22 0 0 1-1.26-4.39c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.55-3.7 8.24-8.24 8.24zm4.52-6.17c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.17.24-.64.8-.78.97-.14.16-.29.18-.53.06-.25-.12-1.05-.39-1.99-1.24-.74-.66-1.23-1.47-1.38-1.72-.14-.24-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.36-.77-1.86-.2-.49-.4-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.22.24-.86.85-.86 2.07 0 1.22.89 2.4 1.02 2.57.12.16 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg>
       Start an order on WhatsApp
     </a>
-    <a class="cta-btn secondary" href="shop.html">Browse the shop first</a>
+    <a class="cta-btn secondary" href="shop.html" onclick="trackClick('browse_shop_first')">Browse the shop first</a>
   </div>
 </div>
 
@@ -252,11 +252,16 @@
     <div class="foot-links">
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
-      <a href="https://www.instagram.com/4drip313/" target="_blank" rel="noopener">Instagram</a>
-      <a href="https://wa.me/15865535504" target="_blank" rel="noopener">WhatsApp</a>
+      <a href="https://www.instagram.com/4drip313/" target="_blank" rel="noopener" onclick="trackClick('instagram_footer')">Instagram</a>
+      <a href="https://wa.me/15865535504" target="_blank" rel="noopener" onclick="trackClick('whatsapp_footer')">WhatsApp</a>
     </div>
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-client.js"></script>
+<script>
+  try { trackPageview('how-it-works'); } catch(e){}
+</script>
 </body>
 </html>

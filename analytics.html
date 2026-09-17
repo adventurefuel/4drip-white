@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Analytics — 4DRIP</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,500;0,600;0,700;0,800;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  .panel{ max-width:520px; margin:70px auto; background:var(--bg-1); border:1px solid var(--border); border-radius:4px; padding:30px 28px; }
+  .panel h1{ font-family:"Anton",sans-serif; font-size:22px; text-transform:uppercase; margin:0 0 6px; }
+  .panel .sub{ color:var(--text-muted); font-size:13.5px; margin-bottom:22px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px; }
+  .field input{ width:100%; background:var(--bg-2); border:1px solid var(--border); border-radius:2px; padding:11px 12px; color:var(--text); font-size:14px; }
+  .field input:focus{ outline:none; border-color:var(--teal); }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:0.05em; text-transform:uppercase; font-weight:600; padding:12px 18px; border-radius:2px; background:var(--yellow); color:var(--yellow-ink); width:100%; }
+  .btn:hover{ filter:brightness(0.95); }
+  .btn.ghost{ background:transparent; border:1px solid var(--border); color:var(--text-muted); font-weight:500; }
+  .btn.small{ width:auto; padding:9px 13px; font-size:11px; }
+  .toggle-row{ margin-top:14px; text-align:center; font-size:12.5px; color:var(--text-faint); }
+  .toggle-row button{ color:var(--teal); text-decoration:underline; }
+  .msg{ font-size:13px; padding:11px 13px; border-radius:2px; margin-bottom:14px; }
+  .msg.err{ background:rgba(220,80,80,0.1); color:#e88; border:1px solid rgba(220,80,80,0.3); }
+  .msg.ok{ background:rgba(63,185,95,0.1); color:var(--green); border:1px solid rgba(63,185,95,0.3); }
+  .hidden{ display:none !important; }
+
+  .admin-wrap{ padding:34px 0 60px; }
+  .admin-head{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:22px; flex-wrap:wrap; }
+  .admin-head h1{ font-family:"Anton",sans-serif; font-size:24px; text-transform:uppercase; margin:0; }
+  .admin-head .who{ font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--text-faint); }
+  .admin-head .who b{ color:var(--text-muted); }
+  .head-links{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .head-links a{ font-family:"JetBrains Mono",monospace; font-size:11.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--teal); }
+  .head-links a:hover{ text-decoration:underline; }
+
+  .card-block{ background:var(--bg-1); border:1px solid var(--border); border-radius:4px; padding:22px 22px 24px; margin-bottom:22px; }
+  .card-block h2{ font-family:"Anton",sans-serif; font-size:16.5px; text-transform:uppercase; margin:0 0 4px; }
+  .card-block .desc{ color:var(--text-faint); font-size:12.5px; margin-bottom:16px; }
+
+  /* ---------- RANGE PILLS ---------- */
+  .range-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px; }
+  .range-pill{
+    font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:0.05em; text-transform:uppercase; font-weight:600;
+    padding:8px 14px; border-radius:100px; border:1px solid var(--border); color:var(--text-muted); background:var(--bg-1);
+  }
+  .range-pill:hover{ border-color:var(--teal); }
+  .range-pill.active{ background:var(--yellow); color:var(--yellow-ink); border-color:var(--yellow); }
+  .range-note{ font-size:11.5px; color:var(--text-faint); margin-bottom:22px; margin-top:-14px; }
+
+  /* ---------- KPI CARDS ---------- */
+  .kpi-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:22px; }
+  @media (min-width:720px){ .kpi-grid{ grid-template-columns:repeat(4,1fr); } }
+  .kpi{ background:var(--bg-1); border:1px solid var(--border); border-radius:4px; padding:18px 18px 16px; }
+  .kpi .label{ font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-faint); margin-bottom:8px; }
+  .kpi .value{ font-family:"Anton",sans-serif; font-size:30px; color:var(--yellow); line-height:1; }
+  .kpi .sub{ font-size:11px; color:var(--text-faint); margin-top:7px; }
+
+  /* ---------- TREND ---------- */
+  .trend{ display:flex; align-items:flex-end; gap:4px; height:90px; margin-bottom:6px; }
+  .trend-bar{ flex:1; min-width:4px; background:var(--yellow); border-radius:2px 2px 0 0; position:relative; }
+  .trend-bar .tb-tip{
+    position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:4px;
+    font-family:"JetBrains Mono",monospace; font-size:9.5px; color:var(--text-faint); white-space:nowrap; opacity:0; transition:opacity .1s ease;
+  }
+  .trend-bar:hover .tb-tip{ opacity:1; }
+  .trend-labels{ display:flex; justify-content:space-between; font-family:"JetBrains Mono",monospace; font-size:9.5px; color:var(--text-faint); }
+
+  /* ---------- BREAKDOWN TABLES ---------- */
+  .bd-grid{ display:grid; grid-template-columns:1fr; gap:22px; }
+  @media (min-width:860px){ .bd-grid{ grid-template-columns:1fr 1fr; } }
+  .bd-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--border-soft); }
+  .bd-row:first-child{ border-top:none; }
+  .bd-row .bd-name{ flex:1; min-width:0; font-size:13px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bd-row .bd-bar{ flex:none; width:90px; height:6px; border-radius:100px; background:var(--bg-2); overflow:hidden; }
+  .bd-row .bd-bar-fill{ height:100%; background:var(--teal); border-radius:100px; }
+  .bd-row .bd-count{ flex:none; width:38px; text-align:right; font-family:"JetBrains Mono",monospace; font-size:12.5px; color:var(--text); }
+  .empty-note{ font-size:12.5px; color:var(--text-faint); padding:8px 0; }
+
+  /* ---------- RECENT ACTIVITY ---------- */
+  .feed{ display:flex; flex-direction:column; }
+  .feed-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--border-soft); font-size:12.5px; }
+  .feed-row:first-child{ border-top:none; }
+  .feed-tag{ flex:none; font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:0.04em; text-transform:uppercase; padding:3px 7px; border-radius:100px; font-weight:700; }
+  .feed-tag.pageview{ background:rgba(92,225,230,0.14); color:var(--teal); }
+  .feed-tag.click{ background:rgba(255,222,89,0.16); color:var(--yellow-ink); background:rgba(255,189,89,0.18); color:var(--orange); }
+  .feed-desc{ flex:1; min-width:0; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .feed-time{ flex:none; font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--text-faint); }
+  .loading-note{ font-size:12.5px; color:var(--text-faint); padding:20px 0; text-align:center; }
+</style>
+</head>
+<body data-page="analytics">
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a class="nav-brand" href="index.html"><img src="assets/logo.png" alt=""><span>4DRIP</span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="#" id="signout-link" class="hidden">Sign out</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ AUTH GATE ============ -->
+<div id="auth-gate" class="panel">
+  <h1>Admin sign in</h1>
+  <div class="sub">Analytics — Tarmale &amp; Jay only.</div>
+  <div id="auth-msg"></div>
+
+  <form id="signin-form">
+    <div class="field"><label>Email</label><input type="email" id="si-email" required autocomplete="username"></div>
+    <div class="field"><label>Password</label><input type="password" id="si-password" required autocomplete="current-password"></div>
+    <button class="btn" type="submit">Sign in</button>
+  </form>
+
+  <form id="signup-form" class="hidden">
+    <div class="field"><label>Email</label><input type="email" id="su-email" required autocomplete="username"></div>
+    <div class="field"><label>Create password</label><input type="password" id="su-password" required minlength="8" autocomplete="new-password"></div>
+    <button class="btn" type="submit">Create account</button>
+  </form>
+
+  <div class="toggle-row">
+    <span id="toggle-to-signup">First time here? <button type="button" onclick="showSignup()">Create an account</button></span>
+    <span id="toggle-to-signin" class="hidden">Already have an account? <button type="button" onclick="showSignin()">Sign in</button></span>
+  </div>
+</div>
+
+<!-- ============ PENDING APPROVAL ============ -->
+<div id="pending-gate" class="panel hidden">
+  <h1>Account pending approval</h1>
+  <div class="sub">You're signed in, but this account hasn't been given access yet.</div>
+  <div class="msg ok">Send this to Tarmale or Jay so they can approve you:<br><b id="pending-email" class="mono"></b></div>
+  <button class="btn ghost" onclick="signOut()">Sign out</button>
+</div>
+
+<!-- ============ ANALYTICS APP ============ -->
+<div id="admin-app" class="admin-wrap hidden">
+  <div class="wrap">
+    <div class="admin-head">
+      <h1>Analytics</h1>
+      <div class="head-links">
+        <div class="who">Signed in as <b id="who-email"></b></div>
+        <a href="admin.html">Bulk Inventory &rarr;</a>
+        <a href="cost-analyzer.html">Cost Analyzer &rarr;</a>
+      </div>
+    </div>
+
+    <div class="range-row" id="range-row">
+      <button class="range-pill" data-days="1">Today</button>
+      <button class="range-pill" data-days="7">Last 7 days</button>
+      <button class="range-pill active" data-days="30">Last 30 days</button>
+      <button class="range-pill" data-days="90">Last 90 days</button>
+      <button class="range-pill" data-days="0">All time</button>
+    </div>
+    <div class="range-note" id="range-note">Loading&hellip;</div>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="label">Site visits</div>
+        <div class="value" id="k-visits">&mdash;</div>
+        <div class="sub">Pageviews logged</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Unique visitors</div>
+        <div class="value" id="k-uniques">&mdash;</div>
+        <div class="sub">Distinct browser sessions</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Click-throughs</div>
+        <div class="value" id="k-clicks">&mdash;</div>
+        <div class="sub">WhatsApp, Instagram &amp; product taps</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Click-through rate</div>
+        <div class="value" id="k-ctr">&mdash;</div>
+        <div class="sub">Clicks per visit</div>
+      </div>
+    </div>
+
+    <div class="card-block">
+      <h2>Visits over time</h2>
+      <div class="desc">Daily pageviews for the selected range.</div>
+      <div class="trend" id="trend"></div>
+      <div class="trend-labels" id="trend-labels"></div>
+    </div>
+
+    <div class="bd-grid">
+      <div class="card-block">
+        <h2>Visits by page</h2>
+        <div class="desc">Which pages people land on and browse.</div>
+        <div id="by-page"></div>
+      </div>
+      <div class="card-block">
+        <h2>Click-throughs by action</h2>
+        <div class="desc">What people tap once they're here.</div>
+        <div id="by-label"></div>
+      </div>
+    </div>
+
+    <div class="card-block" style="margin-bottom:0;">
+      <h2>Recent activity</h2>
+      <div class="desc">Most recent 25 visits and clicks in the selected range.</div>
+      <div class="feed" id="feed"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-client.js"></script>
+<script>
+  let session = null;
+  let isAdmin = false;
+  let currentDays = 30;
+  const $ = id => document.getElementById(id);
+
+  function show(id){ $(id).classList.remove("hidden"); }
+  function hide(id){ $(id).classList.add("hidden"); }
+
+  function showSignup(){ hide("signin-form"); show("signup-form"); hide("toggle-to-signup"); show("toggle-to-signin"); }
+  function showSignin(){ show("signin-form"); hide("signup-form"); show("toggle-to-signup"); hide("toggle-to-signin"); }
+
+  function authMsg(text, cls){
+    $("auth-msg").innerHTML = text ? `<div class="msg ${cls}">${text}</div>` : "";
+  }
+
+  async function init(){
+    const { data } = await db.auth.getSession();
+    session = data.session;
+    await refreshGate();
+
+    db.auth.onAuthStateChange((_event, sess) => {
+      session = sess;
+      refreshGate();
+    });
+  }
+
+  async function refreshGate(){
+    hide("auth-gate"); hide("pending-gate"); hide("admin-app");
+    $("signout-link").classList.add("hidden");
+
+    if (!session){
+      show("auth-gate");
+      return;
+    }
+
+    const { data: adminRow } = await db.from("admins").select("id").eq("id", session.user.id).maybeSingle();
+    isAdmin = !!adminRow;
+
+    if (!isAdmin){
+      $("pending-email").textContent = session.user.email;
+      show("pending-gate");
+      return;
+    }
+
+    $("who-email").textContent = session.user.email;
+    $("signout-link").classList.remove("hidden");
+    show("admin-app");
+    loadAnalytics(currentDays);
+  }
+
+  $("signin-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    authMsg("", "");
+    const { error } = await db.auth.signInWithPassword({ email: $("si-email").value, password: $("si-password").value });
+    if (error) authMsg(error.message, "err");
+  });
+
+  $("signup-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    authMsg("", "");
+    const { data, error } = await db.auth.signUp({ email: $("su-email").value, password: $("su-password").value });
+    if (error){ authMsg(error.message, "err"); return; }
+    if (data.session){
+      authMsg("Account created.", "ok");
+    } else {
+      authMsg("Account created — check your email to confirm, then sign in.", "ok");
+      showSignin();
+    }
+  });
+
+  async function signOut(){ await db.auth.signOut(); }
+  $("signout-link").addEventListener("click", e => { e.preventDefault(); signOut(); });
+
+  /* ---------------- Analytics dashboard ---------------- */
+  const MAX_ROWS = 8000; // safety cap on how many raw events we pull per range
+
+  $("range-row").addEventListener("click", e => {
+    const btn = e.target.closest(".range-pill");
+    if (!btn) return;
+    document.querySelectorAll(".range-pill").forEach(el => el.classList.remove("active"));
+    btn.classList.add("active");
+    currentDays = parseInt(btn.dataset.days, 10);
+    loadAnalytics(currentDays);
+  });
+
+  function fmtDayLabel(d){
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+  function dayKey(d){
+    return d.toISOString().slice(0, 10);
+  }
+  function escapeHtml(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  }
+  function labelize(s){
+    if (!s) return "(unlabeled)";
+    return String(s).replace(/_/g, " ");
+  }
+
+  async function loadAnalytics(days){
+    $("range-note").textContent = "Loading…";
+    $("feed").innerHTML = `<div class="loading-note">Loading recent activity&hellip;</div>`;
+
+    let query = db.from("analytics_events")
+      .select("event_type,page,label,sku,session_id,created_at")
+      .order("created_at", { ascending: false })
+      .limit(MAX_ROWS);
+
+    let since = null;
+    if (days > 0){
+      since = new Date();
+      since.setHours(0, 0, 0, 0);
+      since.setDate(since.getDate() - (days - 1));
+      query = query.gte("created_at", since.toISOString());
+    }
+
+    const { data, error } = await query;
+    if (error){
+      $("range-note").textContent = "Couldn't load analytics: " + error.message;
+      $("feed").innerHTML = "";
+      return;
+    }
+
+    const events = data || [];
+    const pageviews = events.filter(e => e.event_type === "pageview");
+    const clicks = events.filter(e => e.event_type === "click");
+    const uniqueSessions = new Set(events.map(e => e.session_id).filter(Boolean)).size;
+    const ctr = pageviews.length > 0 ? (clicks.length / pageviews.length) * 100 : 0;
+
+    $("k-visits").textContent = pageviews.length.toLocaleString();
+    $("k-uniques").textContent = uniqueSessions.toLocaleString();
+    $("k-clicks").textContent = clicks.length.toLocaleString();
+    $("k-ctr").textContent = pageviews.length > 0 ? `${ctr.toFixed(0)}%` : "—";
+
+    $("range-note").textContent = events.length >= MAX_ROWS
+      ? `Showing the most recent ${MAX_ROWS.toLocaleString()} events in range — there may be more.`
+      : (days > 0 ? `Tracking since ${fmtDayLabel(since)}.` : "All tracked activity since analytics was added.");
+
+    // ---- Trend: daily pageviews, last N days (capped at 30 bars for readability) ----
+    const trendDays = days > 0 ? Math.min(days, 30) : 30;
+    const buckets = [];
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    for (let i = trendDays - 1; i >= 0; i--){
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      buckets.push({ date: d, key: dayKey(d), count: 0 });
+    }
+    const bucketMap = {};
+    buckets.forEach(b => { bucketMap[b.key] = b; });
+    pageviews.forEach(e => {
+      const key = String(e.created_at).slice(0, 10);
+      if (bucketMap[key]) bucketMap[key].count++;
+    });
+    const maxCount = Math.max(1, ...buckets.map(b => b.count));
+    $("trend").innerHTML = buckets.map(b => `
+      <div class="trend-bar" style="height:${Math.max(3, (b.count / maxCount) * 100)}%;">
+        <span class="tb-tip">${fmtDayLabel(b.date)}: ${b.count}</span>
+      </div>`).join("") || `<div class="empty-note">No visits yet.</div>`;
+    $("trend-labels").innerHTML = buckets.length
+      ? `<span>${fmtDayLabel(buckets[0].date)}</span><span>${fmtDayLabel(buckets[buckets.length - 1].date)}</span>`
+      : "";
+
+    // ---- Breakdown: visits by page ----
+    renderBreakdown("by-page", countBy(pageviews, e => e.page || "(unknown)"), labelize);
+    // ---- Breakdown: clicks by label ----
+    renderBreakdown("by-label", countBy(clicks, e => e.label || "(unlabeled)"), labelize);
+
+    // ---- Recent activity feed ----
+    const recent = events.slice(0, 25);
+    $("feed").innerHTML = recent.length ? recent.map(e => {
+      const when = new Date(e.created_at);
+      const desc = e.event_type === "pageview"
+        ? `Visited ${labelize(e.page)}`
+        : `Clicked ${labelize(e.label)}${e.sku ? " &middot; SKU " + escapeHtml(e.sku) : ""}`;
+      return `<div class="feed-row">
+        <span class="feed-tag ${e.event_type}">${e.event_type}</span>
+        <span class="feed-desc">${desc}</span>
+        <span class="feed-time">${when.toLocaleDateString(undefined,{month:"short",day:"numeric"})} ${when.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})}</span>
+      </div>`;
+    }).join("") : `<div class="empty-note">No activity in this range yet.</div>`;
+  }
+
+  function countBy(list, keyFn){
+    const map = new Map();
+    list.forEach(item => {
+      const k = keyFn(item);
+      map.set(k, (map.get(k) || 0) + 1);
+    });
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+  }
+
+  function renderBreakdown(elId, rows, labelFn){
+    const el = $(elId);
+    if (!rows.length){
+      el.innerHTML = `<div class="empty-note">Nothing tracked in this range yet.</div>`;
+      return;
+    }
+    const max = rows[0][1];
+    el.innerHTML = rows.slice(0, 12).map(([name, count]) => `
+      <div class="bd-row">
+        <span class="bd-name">${escapeHtml(labelFn(name))}</span>
+        <span class="bd-bar"><span class="bd-bar-fill" style="width:${Math.max(4, (count / max) * 100)}%;"></span></span>
+        <span class="bd-count">${count}</span>
+      </div>`).join("");
+  }
+
+  init();
+</script>
+</body>
+</html>
